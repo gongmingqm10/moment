@@ -39,4 +39,8 @@ public class Moment implements Serializable{
     public void setComments(Moment[] comments) {
         this.comments = comments;
     }
+
+    public boolean isPresent() {
+        return content != null || images != null || sender != null || comments != null;
+    }
 }
