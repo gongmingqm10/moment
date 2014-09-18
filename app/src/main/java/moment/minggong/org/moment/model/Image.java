@@ -2,9 +2,6 @@ package moment.minggong.org.moment.model;
 
 import java.io.Serializable;
 
-/**
- * Created by minggong on 9/17/14.
- */
 public class Image implements Serializable {
     private String url;
 

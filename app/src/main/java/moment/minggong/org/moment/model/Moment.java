@@ -2,7 +2,7 @@ package moment.minggong.org.moment.model;
 
 import java.io.Serializable;
 
-public class Moment implements Serializable{
+public class Moment implements Serializable {
     private String content;
     private Image[] images;
     private User sender;

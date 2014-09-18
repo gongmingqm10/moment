@@ -24,7 +24,7 @@ public class NetworkUtil {
             conn.connect();
             is = conn.getInputStream();
             object = getObjectMapper().readValue(parseStringFromInputStream(is), clazz);
-        }  finally {
+        } finally {
             if (is != null) is.close();
             return object;
         }

@@ -23,12 +23,13 @@ public class TweetListAdapter extends BaseAdapter {
 
     private Activity activity;
     private List<Moment> data;
+
     public TweetListAdapter(Activity activity) {
         this.activity = activity;
         data = new ArrayList<Moment>();
     }
 
-    public void addData(Moment[] moments) {
+    public void addData(List<Moment> moments) {
         for (Moment moment : moments) {
             if (moment.isPresent()) data.add(moment);
         }

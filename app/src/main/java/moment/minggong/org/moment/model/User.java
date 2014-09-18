@@ -1,9 +1,12 @@
 package moment.minggong.org.moment.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 
 public class User implements Serializable {
 
+    @JsonProperty("profile-image")
     private String profileImage;
     private String avatar;
     private String nick;
@@ -41,13 +44,4 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "profileImage='" + profileImage + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", nick='" + nick + '\'' +
-                ", username='" + username + '\'' +
-                '}';
-    }
 }
