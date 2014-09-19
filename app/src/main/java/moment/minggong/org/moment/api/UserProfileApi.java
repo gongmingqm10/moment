@@ -2,14 +2,9 @@ package moment.minggong.org.moment.api;
 
 import java.io.IOException;
 
-import moment.minggong.org.moment.api.AbsApi;
-import moment.minggong.org.moment.api.ApiCallResponse;
 import moment.minggong.org.moment.model.User;
 import moment.minggong.org.moment.network.NetworkUtil;
 
-/**
- * Created by minggong on 9/18/14.
- */
 public class UserProfileApi extends AbsApi<User> {
 
     private final static String URL = "http://thoughtworks-ios.herokuapp.com/user/jsmith";

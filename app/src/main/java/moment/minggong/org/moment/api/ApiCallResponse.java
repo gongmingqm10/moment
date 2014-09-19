@@ -2,11 +2,6 @@ package moment.minggong.org.moment.api;
 
 import java.io.Serializable;
 
-import moment.minggong.org.moment.api.AbsApi;
-
-/**
- * Created by minggong on 9/18/14.
- */
 public class ApiCallResponse<T extends Object> implements Serializable {
     private T data;
     private String errorMessage;
