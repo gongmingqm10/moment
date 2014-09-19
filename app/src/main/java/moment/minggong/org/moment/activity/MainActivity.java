@@ -2,33 +2,30 @@ package moment.minggong.org.moment.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import moment.minggong.org.moment.R;
+import moment.minggong.org.moment.api.ApiCallResponse;
+import moment.minggong.org.moment.api.TweetListApi;
+import moment.minggong.org.moment.api.UserProfileApi;
 import moment.minggong.org.moment.model.Moment;
 import moment.minggong.org.moment.model.User;
-import moment.minggong.org.moment.network.NetworkUtil;
+import moment.minggong.org.moment.network.NetworkMgr;
 import moment.minggong.org.moment.view.TweetListAdapter;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinishListener {
 
     private static final int COUNT_PER_PAGE = 5;
-    private static final int HTTP_PROFILE_REQUEST_CODE = 100;
-    private static final int HTTP_TWEET_REQUEST_CODE = 200;
-    private static final String TWEET_LIST_API = "http://thoughtworks-ios.herokuapp.com/user/jsmith/tweets";
-    private static final String PROFILE_API = "http://thoughtworks-ios.herokuapp.com/user/jsmith";
     private TweetListAdapter listAdapter;
     private TextView userName;
     private ImageView profileImage;
@@ -50,21 +47,8 @@ public class MainActivity extends Activity {
             }
         }
     };
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == HTTP_PROFILE_REQUEST_CODE && msg.obj != null) {
-                User user = (User) msg.obj;
-                Picasso.with(MainActivity.this).load(user.getProfileImage()).into(profileImage);
-                Picasso.with(MainActivity.this).load(user.getAvatar()).into(userAvatar);
-                userName.setText(user.getNick());
-            } else if (msg.what == HTTP_TWEET_REQUEST_CODE && msg.obj != null) {
-                MainActivity.this.momentList = Arrays.asList((Moment[]) msg.obj);
-                loadMoments(0);
-                listView.setOnScrollListener(onScrollListener);
-            }
-        }
-    };
+    private UserProfileApi userProfileApi;
+    private TweetListApi tweetListApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,43 +71,24 @@ public class MainActivity extends Activity {
         listView.setAdapter(listAdapter);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        NetworkMgr.getInstance().addOnApiCallFinishListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        NetworkMgr.getInstance().removeOnApiCallFinishListener(this);
+    }
+
     private void startHttpRequest() {
-        requestUserProfile();
-        requestTweetList();
-    }
+        userProfileApi = new UserProfileApi();
+        tweetListApi = new TweetListApi();
+        NetworkMgr.getInstance().startSync(userProfileApi);
+        NetworkMgr.getInstance().startSync(tweetListApi);
 
-    private void requestTweetList() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Moment[] moments = (Moment[]) NetworkUtil.call(TWEET_LIST_API, Moment[].class);
-                    Message message = new Message();
-                    message.what = HTTP_TWEET_REQUEST_CODE;
-                    message.obj = moments;
-                    handler.sendMessage(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    private void requestUserProfile() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    User user = (User) NetworkUtil.call(PROFILE_API, User.class);
-                    Message message = new Message();
-                    message.what = HTTP_PROFILE_REQUEST_CODE;
-                    message.obj = user;
-                    handler.sendMessage(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     private void loadMoments(int page) {
@@ -137,4 +102,26 @@ public class MainActivity extends Activity {
         listAdapter.addData(currentPageData);
     }
 
+    @Override
+    public void onApiCallFinish(ApiCallResponse<?> response) {
+        if (response == null) return;
+        if (response.getAbsApi() == userProfileApi) {
+            if (response.isSuccess()) {
+                User user = (User) response.getData();
+                Picasso.with(MainActivity.this).load(user.getProfileImage()).into(profileImage);
+                Picasso.with(MainActivity.this).load(user.getAvatar()).into(userAvatar);
+                userName.setText(user.getNick());
+            } else {
+                Toast.makeText(this, response.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            }
+        } else if (response.getAbsApi() == tweetListApi) {
+            if (response.isSuccess()) {
+                MainActivity.this.momentList = Arrays.asList((Moment[]) response.getData());
+                loadMoments(0);
+                listView.setOnScrollListener(onScrollListener);
+            } else {
+                Toast.makeText(this, response.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

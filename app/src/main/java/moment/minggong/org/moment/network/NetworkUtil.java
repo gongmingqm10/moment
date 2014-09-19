@@ -30,7 +30,7 @@ public class NetworkUtil {
         }
     }
 
-    public static ObjectMapper getObjectMapper() {
+    private static ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -38,10 +38,10 @@ public class NetworkUtil {
         return objectMapper;
     }
 
-    public static String parseStringFromInputStream(InputStream is) throws IOException {
+    private static String parseStringFromInputStream(InputStream is) throws IOException {
         byte[] buffer = new byte[1024];
         StringBuilder builder = new StringBuilder();
-        int numberRead = 0;
+        int numberRead;
         while ((numberRead = is.read(buffer)) > 0) {
             builder.append(new String(buffer, 0, numberRead));
         }
