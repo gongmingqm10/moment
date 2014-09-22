@@ -1,4 +1,11 @@
-The WeChat Moments(Android)
+## Dependencies:
+=====
+https://github.com/chrisbanes/Android-PullToRefresh
+
+Please setup this module dependency to make it work.
+
+
+## Requirement: The WeChat Moments(Android)
 ======
 ####Overview
 The assignment is to build an Android App which looks like WeChat Moments page. Production and Technical requirements are weighing equally in final result.

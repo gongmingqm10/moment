@@ -3,6 +3,8 @@ package moment.minggong.org.moment.activity;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.entity.StringEntity;
@@ -33,7 +35,8 @@ public class MainActivityTest {
     @Test
     public void shouldContainHeaderAndFooterView() {
         MainActivity mainActivity = controller.create().get();
-        ListView listView = (ListView) mainActivity.findViewById(R.id.listView);
+        PullToRefreshListView pullToRefreshListView = (PullToRefreshListView) mainActivity.findViewById(R.id.listView);
+        ListView listView = pullToRefreshListView.getRefreshableView();
         assertNotNull(listView);
         assertThat(listView.getAdapter().getCount(), is(2));
     }

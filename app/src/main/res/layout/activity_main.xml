@@ -20,7 +20,7 @@
             android:textColor="@android:color/white"
             />
     </RelativeLayout>
-    <ListView
+    <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:id="@+id/listView"

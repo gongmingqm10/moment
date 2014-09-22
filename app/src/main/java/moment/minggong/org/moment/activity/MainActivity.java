@@ -2,6 +2,7 @@ package moment.minggong.org.moment.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageView;
@@ -9,6 +10,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.squareup.picasso.Picasso;
 
 import java.util.Arrays;
@@ -31,8 +34,11 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
     private ImageView profileImage;
     private ImageView userAvatar;
     private View footerView;
-    private ListView listView;
     private List<Moment> momentList;
+
+    private PullToRefreshListView pullToRefreshListView;
+    private ListView listView;
+
     private int currentPage = 0;
     private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
         @Override
@@ -47,6 +53,17 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
             }
         }
     };
+
+    private PullToRefreshBase.OnRefreshListener onRefreshListener = new PullToRefreshBase.OnRefreshListener() {
+        @Override
+        public void onRefresh(PullToRefreshBase refreshView) {
+            String label = DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(),
+                    DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
+            refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
+            startSync();
+        }
+    };
+
     private UserProfileApi userProfileApi;
     private TweetListApi tweetListApi;
 
@@ -54,21 +71,23 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initCmp();
-        startHttpRequest();
+        init();
+        startSync();
     }
 
-    private void initCmp() {
-        listView = (ListView) findViewById(R.id.listView);
-        listAdapter = new TweetListAdapter(this);
+    private void init() {
+        pullToRefreshListView = (PullToRefreshListView) findViewById(R.id.listView);
+        pullToRefreshListView.setOnRefreshListener(onRefreshListener);
+        listView = pullToRefreshListView.getRefreshableView();
+
         View headerView = getLayoutInflater().inflate(R.layout.tweet_header_view, null);
         profileImage = (ImageView) headerView.findViewById(R.id.profileImage);
         userName = (TextView) headerView.findViewById(R.id.userName);
         userAvatar = (ImageView) headerView.findViewById(R.id.userAvatar);
         listView.addHeaderView(headerView, null, false);
+
         footerView = getLayoutInflater().inflate(R.layout.loading_layout, null);
         listView.addFooterView(footerView);
-        listView.setAdapter(listAdapter);
     }
 
     @Override
@@ -78,12 +97,16 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         NetworkMgr.getInstance().removeOnApiCallFinishListener(this);
     }
 
-    private void startHttpRequest() {
+    private void startSync() {
+        currentPage = 0;
+        listAdapter = new TweetListAdapter(this);
+        listView.setAdapter(listAdapter);
+
         userProfileApi = new UserProfileApi();
         tweetListApi = new TweetListApi();
         NetworkMgr.getInstance().startSync(userProfileApi);
@@ -122,6 +145,7 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
             } else {
                 Toast.makeText(this, response.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
+            if (pullToRefreshListView.isRefreshing()) pullToRefreshListView.onRefreshComplete();
         }
     }
 }
