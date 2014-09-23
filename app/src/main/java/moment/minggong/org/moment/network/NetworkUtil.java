@@ -13,7 +13,7 @@ public class NetworkUtil {
 
     private static ObjectMapper objectMapper;
 
-    public static Object call(String urlString, Class<?> clazz) throws IOException {
+    public static synchronized Object call(String urlString, Class<?> clazz) throws IOException {
         InputStream is = null;
         Object object = null;
         try {

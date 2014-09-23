@@ -5,5 +5,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="moment">朋友圈</string>
+    <string name="blue_text_template"><![CDATA[<font color=\'#268CBF\'>%s: </font>]]></string>
 
 </resources>

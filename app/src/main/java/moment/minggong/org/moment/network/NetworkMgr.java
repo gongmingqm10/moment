@@ -17,6 +17,7 @@ public class NetworkMgr {
     private static NetworkMgr instance;
     private ThreadPoolExecutor threadPoolExecutor;
     private ConcurrentLinkedQueue<OnApiCallFinishListener> listeners;
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -33,7 +34,7 @@ public class NetworkMgr {
         listeners = new ConcurrentLinkedQueue<OnApiCallFinishListener>();
     }
 
-    public static NetworkMgr getInstance() {
+    public static synchronized NetworkMgr getInstance() {
         if (instance == null) instance = new NetworkMgr();
         return instance;
     }

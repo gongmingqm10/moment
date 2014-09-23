@@ -5,6 +5,7 @@ import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,7 +34,6 @@ public class TweetListAdapter extends BaseAdapter {
         for (Moment moment : moments) {
             if (moment.isPresent()) data.add(moment);
         }
-
         this.notifyDataSetChanged();
     }
 
@@ -61,15 +61,15 @@ public class TweetListAdapter extends BaseAdapter {
             holder.userImage = (ImageView) view.findViewById(R.id.userImage);
             holder.userName = (TextView) view.findViewById(R.id.userName);
             holder.content = (TextView) view.findViewById(R.id.content);
-            holder.imageContainer = (LinearLayout) view.findViewById(R.id.imageContainer);
             holder.replyContainer = (LinearLayout) view.findViewById(R.id.replyContainer);
+            holder.imageGrid = (GridView) view.findViewById(R.id.imageGrid);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
         }
-        holder.imageContainer.removeAllViews();
         holder.replyContainer.removeAllViews();
         holder.replyContainer.setVisibility(View.GONE);
+        holder.imageGrid.setAdapter(null);
 
         final Moment moment = data.get(position);
 
@@ -83,9 +83,8 @@ public class TweetListAdapter extends BaseAdapter {
             Picasso.with(activity).load(sender.getAvatar()).into(holder.userImage);
             holder.userName.setText(sender.getNick());
         }
-        if (images != null && images.length > 0) loadImage(images, holder.imageContainer);
+        if (images != null && images.length > 0) holder.imageGrid.setAdapter(new ImageGridAdapter(activity, images));
         if (comments != null && comments.length > 0) loadComment(comments, holder.replyContainer);
-
 
         return view;
     }
@@ -94,23 +93,9 @@ public class TweetListAdapter extends BaseAdapter {
         replyContainer.setVisibility(View.VISIBLE);
         for (Moment comment : comments) {
             TextView textView = (TextView) activity.getLayoutInflater().inflate(R.layout.textview_item, null);
-            String htmlSource = "<font color='#268CBF'>" + comment.getSender().getNick() + ": </font>" + comment.getContent();
-            textView.setText(Html.fromHtml(htmlSource));
+            String commentHtmlSource = String.format(activity.getString(R.string.blue_text_template), comment.getSender().getNick()) + comment.getContent();
+            textView.setText(Html.fromHtml(commentHtmlSource));
             replyContainer.addView(textView);
-        }
-    }
-
-    private void loadImage(Image[] images, LinearLayout imageContainer) {
-        int MAX_IMAGE_COUNT = 3;
-        int lines = (images.length + MAX_IMAGE_COUNT - 1) / MAX_IMAGE_COUNT;
-        for (int row = 0; row < lines; row++) {
-            LinearLayout rowLayout = (LinearLayout) activity.getLayoutInflater().inflate(R.layout.linearlayout_item, null);
-            for (int index = row * MAX_IMAGE_COUNT; index < Math.min(row * MAX_IMAGE_COUNT + MAX_IMAGE_COUNT, images.length); index++) {
-                ImageView image = (ImageView) activity.getLayoutInflater().inflate(R.layout.imageview_item, null);
-                Picasso.with(activity).load(images[index].getUrl()).into(image);
-                rowLayout.addView(image);
-            }
-            imageContainer.addView(rowLayout);
         }
     }
 
@@ -118,7 +103,7 @@ public class TweetListAdapter extends BaseAdapter {
         ImageView userImage;
         TextView userName;
         TextView content;
-        LinearLayout imageContainer;
+        GridView imageGrid;
         LinearLayout replyContainer;
     }
 }

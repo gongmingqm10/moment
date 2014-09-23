@@ -6,4 +6,5 @@
     android:layout_weight="1"
     android:padding="5dp"
     android:scaleType="centerCrop"
+    android:id="@+id/image"
     />

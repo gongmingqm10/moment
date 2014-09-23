@@ -28,59 +28,36 @@ import moment.minggong.org.moment.view.TweetListAdapter;
 
 public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinishListener {
 
-    private static final int COUNT_PER_PAGE = 5;
     private TweetListAdapter listAdapter;
     private TextView userName;
     private ImageView profileImage;
     private ImageView userAvatar;
     private View footerView;
     private List<Moment> momentList;
-
     private PullToRefreshListView pullToRefreshListView;
     private ListView listView;
+    private View headerView;
 
     private int currentPage = 0;
-    private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener() {
-        @Override
-        public void onScrollStateChanged(AbsListView absListView, int i) {
-
-        }
-
-        @Override
-        public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (firstVisibleItem + visibleItemCount == totalItemCount && totalItemCount != 0) {
-                loadMoments(++currentPage);
-            }
-        }
-    };
-
-    private PullToRefreshBase.OnRefreshListener onRefreshListener = new PullToRefreshBase.OnRefreshListener() {
-        @Override
-        public void onRefresh(PullToRefreshBase refreshView) {
-            String label = DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(),
-                    DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
-            refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
-            startSync();
-        }
-    };
-
     private UserProfileApi userProfileApi;
     private TweetListApi tweetListApi;
+
+    private static final int COUNT_PER_PAGE = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-        startSync();
     }
 
     private void init() {
         pullToRefreshListView = (PullToRefreshListView) findViewById(R.id.listView);
-        pullToRefreshListView.setOnRefreshListener(onRefreshListener);
+        pullToRefreshListView.setOnRefreshListener(new PullToRefreshListener());
         listView = pullToRefreshListView.getRefreshableView();
 
-        View headerView = getLayoutInflater().inflate(R.layout.tweet_header_view, null);
+        headerView = getLayoutInflater().inflate(R.layout.tweet_header_view, null);
+        headerView.setVisibility(View.GONE);
         profileImage = (ImageView) headerView.findViewById(R.id.profileImage);
         userName = (TextView) headerView.findViewById(R.id.userName);
         userAvatar = (ImageView) headerView.findViewById(R.id.userAvatar);
@@ -94,6 +71,7 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
     protected void onStart() {
         super.onStart();
         NetworkMgr.getInstance().addOnApiCallFinishListener(this);
+        loadData();
     }
 
     @Override
@@ -102,7 +80,7 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
         NetworkMgr.getInstance().removeOnApiCallFinishListener(this);
     }
 
-    private void startSync() {
+    private void loadData() {
         currentPage = 0;
         listAdapter = new TweetListAdapter(this);
         listView.setAdapter(listAdapter);
@@ -131,6 +109,7 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
         if (response.getAbsApi() == userProfileApi) {
             if (response.isSuccess()) {
                 User user = (User) response.getData();
+                if (headerView.getVisibility() != View.VISIBLE) headerView.setVisibility(View.VISIBLE);
                 Picasso.with(MainActivity.this).load(user.getProfileImage()).into(profileImage);
                 Picasso.with(MainActivity.this).load(user.getAvatar()).into(userAvatar);
                 userName.setText(user.getNick());
@@ -141,11 +120,37 @@ public class MainActivity extends Activity implements NetworkMgr.OnApiCallFinish
             if (response.isSuccess()) {
                 MainActivity.this.momentList = Arrays.asList((Moment[]) response.getData());
                 loadMoments(0);
-                listView.setOnScrollListener(onScrollListener);
+                listView.setOnScrollListener(new ScrollToLoadListener());
             } else {
                 Toast.makeText(this, response.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
             if (pullToRefreshListView.isRefreshing()) pullToRefreshListView.onRefreshComplete();
+        }
+    }
+
+    private class ScrollToLoadListener implements AbsListView.OnScrollListener {
+
+        @Override
+        public void onScrollStateChanged(AbsListView absListView, int position) {
+
+        }
+
+        @Override
+        public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if (firstVisibleItem + visibleItemCount == totalItemCount && totalItemCount != 0) {
+                loadMoments(++currentPage);
+            }
+        }
+    }
+
+    private class PullToRefreshListener implements PullToRefreshBase.OnRefreshListener {
+
+        @Override
+        public void onRefresh(PullToRefreshBase refreshView) {
+            String label = DateUtils.formatDateTime(getApplicationContext(), System.currentTimeMillis(),
+                    DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
+            refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
+            loadData();
         }
     }
 }
