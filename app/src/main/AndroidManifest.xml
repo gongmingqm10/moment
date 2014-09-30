@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activity.MainActivity"
+            android:name="org.gongming.moment.activity.MainActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:label="@string/app_name" >
             <intent-filter>
