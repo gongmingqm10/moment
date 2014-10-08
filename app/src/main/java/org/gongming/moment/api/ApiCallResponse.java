@@ -8,6 +8,9 @@ public class ApiCallResponse<T extends Object> implements Serializable {
     private AbsApi<T> absApi;
     private boolean isSuccess;
 
+    public ApiCallResponse() {
+    }
+
     public ApiCallResponse(AbsApi<T> absApi) {
         this.absApi = absApi;
     }

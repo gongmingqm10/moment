@@ -8,7 +8,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import moment.minggong.org.moment.R;
+import org.gongming.moment.R;
 import org.gongming.moment.model.Image;
 
 public class ImageGridAdapter extends BaseAdapter {

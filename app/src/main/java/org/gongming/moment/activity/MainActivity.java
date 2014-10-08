@@ -17,7 +17,7 @@ import com.squareup.picasso.Picasso;
 import java.util.Arrays;
 import java.util.List;
 
-import moment.minggong.org.moment.R;
+import org.gongming.moment.R;
 import org.gongming.moment.api.ApiCallResponse;
 import org.gongming.moment.api.TweetListApi;
 import org.gongming.moment.api.UserProfileApi;

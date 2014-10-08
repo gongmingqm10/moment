@@ -7,7 +7,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:0.12.+'
-        classpath 'org.robolectric:robolectric-gradle-plugin:0.11.+'
+            classpath 'org.robolectric:robolectric-gradle-plugin:0.11.+'
     }
 }
 
@@ -19,7 +19,6 @@ allprojects {
 
 apply plugin: 'com.android.application'
 apply plugin: 'robolectric'
-
 
 android {
     compileSdkVersion 20
@@ -45,20 +44,31 @@ android {
         versionName "1.0"
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
+
     buildTypes {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     sourceSets {
-        androidTest {
-            setRoot('src/test')
+        main {
+            java {
+                srcDir 'src/main/java'
+            }
+            resources {
+                srcDir 'src/main/res'
+            }
         }
+        androidTest.setRoot("src/test")
+
     }
+
 }
 
 dependencies {
+
     androidTestCompile 'junit:junit:4.11'
     androidTestCompile('org.robolectric:robolectric:2.3') {
         exclude module: 'classworlds'
@@ -78,9 +88,11 @@ dependencies {
         exclude module: 'wagon-provider-api'
     }
     androidTestCompile 'com.squareup:fest-android:1.0.+'
+    androidTestCompile 'com.navercorp.pulltorefresh:library:3.2.3@aar'
+//    androidTestCompile fileTree(dir: 'libs', include: '*.jar')
+
     compile 'com.fasterxml.jackson.core:jackson-databind:2.4.2'
     compile 'com.squareup.picasso:picasso:2.3.4'
     compile 'com.navercorp.pulltorefresh:library:3.2.3@aar'
-
 
 }

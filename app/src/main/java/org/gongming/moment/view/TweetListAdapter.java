@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import moment.minggong.org.moment.R;
+import org.gongming.moment.R;
 import org.gongming.moment.model.Image;
 import org.gongming.moment.model.Moment;
 import org.gongming.moment.model.User;

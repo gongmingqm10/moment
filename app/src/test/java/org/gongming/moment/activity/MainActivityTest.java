@@ -5,13 +5,14 @@ import android.widget.TextView;
 
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
+import org.gongming.moment.R;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ActivityController;
 
-import moment.minggong.org.moment.R;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
@@ -22,20 +23,25 @@ import static org.robolectric.Robolectric.buildActivity;
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityTest {
 
-    private final ActivityController<MainActivity> controller = buildActivity(MainActivity.class);
+    private MainActivity mainActivity;
+
+    @Before
+    public void setUp() {
+        mainActivity = buildActivity(MainActivity.class).create().get();
+    }
 
     @Test
     public void shouldContainHeaderAndFooterView() {
-        MainActivity mainActivity = controller.create().get();
         PullToRefreshListView pullToRefreshListView = (PullToRefreshListView) mainActivity.findViewById(R.id.listView);
         ListView listView = pullToRefreshListView.getRefreshableView();
         assertNotNull(listView);
-        assertThat(listView.getAdapter().getCount(), is(2));
+        assertThat(listView.getHeaderViewsCount(), is(2)); // Another extra header is caused by PullToRefreshListView
+        assertThat(listView.getFooterViewsCount(), is(1));
+
     }
 
     @Test
     public void shouldShowTitle() {
-        MainActivity mainActivity = controller.create().start().resume().get();
         TextView textView = (TextView) mainActivity.findViewById(R.id.title);
         assertThat(textView.getText().toString(), is("Moment"));
     }
